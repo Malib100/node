@@ -5,6 +5,7 @@ import { UserModule } from './user/user.module';
 import { DatabaseModule } from './database/database.module';
 import {TypeOrmModule} from "@nestjs/typeorm";
 import  {ConfigModule} from "@nestjs/config";
+import { CategoriesModule } from './categories/categories.module';
 import * as process from "process";
 
 @Module({
@@ -13,6 +14,7 @@ import * as process from "process";
   }),
       UserModule,
       DatabaseModule,
+      CategoriesModule,
       TypeOrmModule.forRoot({
         type: 'postgres',
         host: process.env.DATABASE_HOST || 'localhost',
@@ -21,9 +23,9 @@ import * as process from "process";
         password: process.env.DATABASE_PASSWORD,
         database: process.env.DATABASE_NAME,
           autoLoadEntities: true,
-          entities: [],
+          entities: [ ],
           synchronize: true
-      })
+      }),
   ],
   controllers: [AppController],
   providers: [AppService],
