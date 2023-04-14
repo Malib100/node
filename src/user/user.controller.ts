@@ -1,6 +1,8 @@
-import {Controller, Get, Post} from '@nestjs/common';
+import {Body, Controller, Get, Post} from '@nestjs/common';
 import {MustBeEntityError} from "typeorm";
 import {UserService} from "./user.service";
+import {User} from "../entities/user.entity";
+import {CreateUserDto} from "./dto/create-user.dto";
 
 @Controller('users')
 export class UserController {
@@ -10,7 +12,12 @@ export class UserController {
     }
 
     @Get()
-    findAllUsers(){
+    async findAllUsers() : Promise<User[]>{
         return this.userService.findAllUsers();
+    }
+
+    @Post()
+    async createUser(@Body() createUserDto:CreateUserDto): Promise<User>{
+        return
     }
 }
