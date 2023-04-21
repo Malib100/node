@@ -7,13 +7,16 @@ import {TypeOrmModule} from "@nestjs/typeorm";
 import {User} from "../entities/user.entity";
 import {LocalStrategy} from "./strategies/local.strategy";
 import {JwtModule} from "@nestjs/jwt";
+import * as process from "process";
+import {ConfigModule} from "@nestjs/config";
 
 @Module({
   imports:[
       UserModule,
       TypeOrmModule.forFeature([User]),
+      ConfigModule.forRoot(),
       JwtModule.register({
-        secret: jwtConstants.secret,
+        secret: process.env.JWT_SECRET,
         signOptions: {expiresIn: '60s'},
       }),
   ],
