@@ -1,26 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
+import {InjectRepository} from "@nestjs/typeorm";
+import {Blog} from "../entities/blog.entity";
+import {DeleteResult, Repository} from "typeorm";
 
 @Injectable()
 export class BlogService {
-  create(createBlogDto: CreateBlogDto) {
-    return 'This action adds a new blog';
+
+  constructor(
+      @InjectRepository(Blog) private readonly blogRepository:Repository<Blog> ) {
+  }
+  async create(user_id:number,createBlogDto: CreateBlogDto) {
+    const data = {...createBlogDto, user:{id:user_id},category:{id:createBlogDto.category_id}};
+    const blog:Blog = this.blogRepository.create(data);
+    return await this.blogRepository.save(blog);
   }
 
-  findAll() {
-    return `This action returns all blog`;
+  async findAll():Promise<Blog[]> {
+    return await this.blogRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} blog`;
+  async findOne(id: number):Promise<Blog> {
+    return await this.blogRepository.findOne({
+      where:{id},
+      relations:['user']
+    });
   }
 
-  update(id: number, updateBlogDto: UpdateBlogDto) {
-    return `This action updates a #${id} blog`;
+  async update(id: number, updateBlogDto: UpdateBlogDto) {
+    await this.blogRepository.update(id,updateBlogDto)
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} blog`;
+  async remove(id: number):Promise<DeleteResult> {
+    return this.blogRepository.delete(id);
+
   }
 }

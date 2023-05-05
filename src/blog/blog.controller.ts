@@ -1,34 +1,64 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+  BadRequestException
+} from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
+import {JwtAuthGuard} from "../auth/guards/jwtAuth.guard";
+import {request} from "express";
+import {Blog} from "../entities/blog.entity";
 
-@Controller('blog')
+@Controller('blogs')
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createBlogDto: CreateBlogDto) {
-    return this.blogService.create(createBlogDto);
+  async create(@Request() req,@Body() createBlogDto: CreateBlogDto) {
+    return this.blogService.create(req.user.id,createBlogDto);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.blogService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.blogService.findOne(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBlogDto: UpdateBlogDto) {
+  async update(@Request() req,@Param('id') id: string, @Body() updateBlogDto: UpdateBlogDto) {
+    const currentUser = req.user.id;
+    const blog = await this.blogService.findOne(+id);
+
+    if (currentUser!=blog.user.id){
+      throw new BadRequestException("This is not your blog.")
+    }
     return this.blogService.update(+id, updateBlogDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Request() req,@Param('id') id: string) {
+    const currentUser = req.user.id;
+    const blog = await this.blogService.findOne(+id);
+
+    if (currentUser!=blog.user.id){
+      throw new BadRequestException("This is not your blog.")
+    }
+
     return this.blogService.remove(+id);
   }
 }
